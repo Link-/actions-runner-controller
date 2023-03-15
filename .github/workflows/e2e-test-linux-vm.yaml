@@ -125,6 +125,17 @@ jobs:
         run: |
           kubectl logs deployment/arc-gha-runner-scale-set-controller -n arc-systems
 
+      - name: Job summary
+        if: always()
+        run: |
+          cat <<-EOF > $GITHUB_STEP_SUMMARY
+          ### Summary
+          | **Test**       | Default Test                                 |
+          |----------------|--------------------------------------------- |
+          | **Outcome**    | ${{ steps.install_arc_controller.outcome }}  |
+          | **References** | [Test workflow runs](https://github.com/actions-runner-controller/arc_e2e_test_dummy/actions/workflows/e2e-test-dispatch-workflow.yaml) |
+          EOF
+
   single-namespace-setup:
     runs-on: ubuntu-latest
     steps:
