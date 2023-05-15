@@ -17,6 +17,7 @@
   - [Testing Controller Built from a Pull Request](#testing-controller-built-from-a-pull-request)
   - [Release process](#release-process)
     - [Workflow structure](#workflow-structure)
+      - [Releasing legacy actions-runner-controller image and helm charts](#releasing-legacy-actions-runner-controller-image-and-helm-charts)
 
 ## Welcome
 
@@ -241,7 +242,7 @@ Following the migration of actions-runner-controller to the GitHub actions work,
 | gha-validate-chart.yaml           | (gha) Validate Helm Charts           | Run helm chart validators for charts/gha-runner-scale-set-controller and charts/gha-runner-scale-set charts                                                                                                                                                     |
 | arc-validate-runners.yaml         | Validate ARC Runners                 | Run validators for runners                                                                                                                                                                                                                                      |
 
-There are 7 main components that we release:
+There are 7 components that we release regularly:
 
 1. legacy [actions-runner-controller controller image](https://github.com/actions-runner-controller/actions-runner-controller/pkgs/container/actions-runner-controller)
 2. legacy [actions-runner-controller helm charts](https://actions-runner-controller.github.io/actions-runner-controller/)
@@ -256,3 +257,6 @@ There are 7 main components that we release:
 5. [gha-runner-scale-set-controller helm charts](https://github.com/actions/actions-runner-controller/pkgs/container/actions-runner-controller-charts%2Fgha-runner-scale-set-controller)
 6. [gha-runner-scale-set runner helm charts](https://github.com/actions/actions-runner-controller/pkgs/container/actions-runner-controller-charts%2Fgha-runner-scale-set)
 7. [actions/runner image](https://github.com/actions/actions-runner-controller/pkgs/container/actions-runner-controller%2Factions-runner)
+
+#### Releasing legacy actions-runner-controller image and helm charts
+
