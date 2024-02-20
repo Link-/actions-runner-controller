@@ -39,7 +39,8 @@ githubConfigSecret:
 ## maxRunners is the max number of runners the autoscaling runner set will scale up to.
 # maxRunners: 5
 
-## minRunners is the min number of runners the autoscaling runner set will scale down to.
+## minRunners is the min number of idle runners. The target number of runners created will be
+## calculated as a sum of minRunners and the number of jobs assigned to the scale set.
 # minRunners: 0
 
 # runnerGroup: "default"
@@ -84,6 +85,8 @@ githubConfigSecret:
 #     resources:
 #       requests:
 #         storage: 1Gi
+#   kubernetesModeServiceAccount:
+#     annotations:
 
 ## template is the PodSpec for each listener Pod
 ## For reference: https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec
@@ -122,32 +125,35 @@ template:
   ##       command: ["/home/runner/run.sh"]
   ##       env:
   ##         - name: DOCKER_HOST
-  ##           value: tcp://localhost:2376
-  ##         - name: DOCKER_TLS_VERIFY
-  ##           value: "1"
-  ##         - name: DOCKER_CERT_PATH
-  ##           value: /certs/client
+  ##           value: unix:///run/docker/docker.sock
   ##       volumeMounts:
   ##         - name: work
   ##           mountPath: /home/runner/_work
-  ##         - name: dind-cert
-  ##           mountPath: /certs/client
+  ##         - name: dind-sock
+  ##           mountPath: /run/docker
   ##           readOnly: true
   ##     - name: dind
   ##       image: docker:dind
+  ##       args:
+  ##         - dockerd
+  ##         - --host=unix:///run/docker/docker.sock
+  ##         - --group=$(DOCKER_GROUP_GID)
+  ##       env:
+  ##         - name: DOCKER_GROUP_GID
+  ##           value: "123"
   ##       securityContext:
   ##         privileged: true
   ##       volumeMounts:
   ##         - name: work
   ##           mountPath: /home/runner/_work
-  ##         - name: dind-cert
-  ##           mountPath: /certs/client
+  ##         - name: dind-sock
+  ##           mountPath: /run/docker
   ##         - name: dind-externals
   ##           mountPath: /home/runner/externals
   ##     volumes:
   ##     - name: work
   ##       emptyDir: {}
-  ##     - name: dind-cert
+  ##     - name: dind-sock
   ##       emptyDir: {}
   ##     - name: dind-externals
   ##       emptyDir: {}

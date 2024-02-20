@@ -6,11 +6,10 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -58,6 +57,28 @@ type ActionsService interface {
 	SetUserAgent(info UserAgentInfo)
 }
 
+type clientLogger struct {
+	logr.Logger
+}
+
+func (l *clientLogger) Info(msg string, keysAndValues ...interface{}) {
+	l.Logger.Info(msg, keysAndValues...)
+}
+
+func (l *clientLogger) Debug(msg string, keysAndValues ...interface{}) {
+	// discard debug log
+}
+
+func (l *clientLogger) Error(msg string, keysAndValues ...interface{}) {
+	l.Logger.Error(errors.New(msg), "Retryable client error", keysAndValues...)
+}
+
+func (l *clientLogger) Warn(msg string, keysAndValues ...interface{}) {
+	l.Logger.Info(msg, keysAndValues...)
+}
+
+var _ retryablehttp.LeveledLogger = &clientLogger{}
+
 type Client struct {
 	*http.Client
 
@@ -88,23 +109,31 @@ type ProxyFunc func(req *http.Request) (*url.URL, error)
 type ClientOption func(*Client)
 
 type UserAgentInfo struct {
-	Version    string
-	CommitSHA  string
+	// Version is the version of the controller
+	Version string
+	// CommitSHA is the git commit SHA of the controller
+	CommitSHA string
+	// ScaleSetID is the ID of the scale set
 	ScaleSetID int
+	// HasProxy is true if the controller is running behind a proxy
+	HasProxy bool
+	// Subsystem is the subsystem such as listener, controller, etc.
+	// Each system may pick its own subsystem name.
+	Subsystem string
 }
 
 func (u UserAgentInfo) String() string {
-	var scaleSetID = "NA"
+	scaleSetID := "NA"
 	if u.ScaleSetID > 0 {
 		scaleSetID = strconv.Itoa(u.ScaleSetID)
 	}
 
-	return fmt.Sprintf(
-		"actions-runner-controller/%s CommitSHA/%s ScaleSetID/%s",
-		u.Version,
-		u.CommitSHA,
-		scaleSetID,
-	)
+	proxy := "Proxy/disabled"
+	if u.HasProxy {
+		proxy = "Proxy/enabled"
+	}
+
+	return fmt.Sprintf("actions-runner-controller/%s (%s; %s) ScaleSetID/%s (%s)", u.Version, u.CommitSHA, u.Subsystem, scaleSetID, proxy)
 }
 
 func WithLogger(logger logr.Logger) ClientOption {
@@ -169,10 +198,12 @@ func NewClient(githubConfigURL string, creds *ActionsAuth, options ...ClientOpti
 	}
 
 	retryClient := retryablehttp.NewClient()
-	retryClient.Logger = log.New(io.Discard, "", log.LstdFlags)
+	retryClient.Logger = &clientLogger{Logger: ac.logger}
 
 	retryClient.RetryMax = ac.retryMax
 	retryClient.RetryWaitMax = ac.retryWaitMax
+
+	retryClient.HTTPClient.Timeout = 5 * time.Minute // timeout must be > 1m to accomodate long polling
 
 	transport, ok := retryClient.HTTPClient.Transport.(*http.Transport)
 	if !ok {
@@ -609,8 +640,11 @@ func (c *Client) doSessionRequest(ctx context.Context, method, path string, requ
 		return err
 	}
 
-	if resp.StatusCode == expectedResponseStatusCode && responseUnmarshalTarget != nil {
-		return json.NewDecoder(resp.Body).Decode(responseUnmarshalTarget)
+	if resp.StatusCode == expectedResponseStatusCode {
+		if responseUnmarshalTarget != nil {
+			return json.NewDecoder(resp.Body).Decode(responseUnmarshalTarget)
+		}
+		return nil
 	}
 
 	if resp.StatusCode >= 400 && resp.StatusCode < 500 {
@@ -835,8 +869,7 @@ func (c *Client) getRunnerRegistrationToken(ctx context.Context) (*registrationT
 	bearerToken := ""
 
 	if c.creds.Token != "" {
-		encodedToken := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("github:%v", c.creds.Token)))
-		bearerToken = fmt.Sprintf("Basic %v", encodedToken)
+		bearerToken = fmt.Sprintf("Bearer %v", c.creds.Token)
 	} else {
 		accessToken, err := c.fetchAccessToken(ctx, c.config.ConfigURL.String(), c.creds.AppCreds)
 		if err != nil {

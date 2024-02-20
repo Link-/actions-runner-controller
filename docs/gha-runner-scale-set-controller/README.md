@@ -43,12 +43,61 @@ You can follow [this troubleshooting guide](https://docs.github.com/en/actions/h
 
 ## Changelog
 
+### v0.8.2
+1. Add listener graceful termination period and background context after the message is received [#3187](https://github.com/actions/actions-runner-controller/pull/3187)
+1. Publish metrics in the new ghalistener [#3193](https://github.com/actions/actions-runner-controller/pull/3193)
+1. Delete message session when listener.Listen returns [#3240](https://github.com/actions/actions-runner-controller/pull/3240)
+
+### v0.8.1
+1. Fix proxy issue in new listener client [#3181](https://github.com/actions/actions-runner-controller/pull/3181)
+
+### v0.8.0
+1. Change listener container name [#3167](https://github.com/actions/actions-runner-controller/pull/3167)
+1. Fix empty env and volumeMounts object on default setup [#3166](https://github.com/actions/actions-runner-controller/pull/3166)
+1. Fix override listener pod spec [#3161](https://github.com/actions/actions-runner-controller/pull/3161)
+1. Change minRunners behavior and fix the new listener min runners [#3139](https://github.com/actions/actions-runner-controller/pull/3139)
+1. Update user agent for new ghalistener [#3138](https://github.com/actions/actions-runner-controller/pull/3138)
+1. Bump golang.org/x/oauth2 from 0.14.0 to 0.15.0 [#3127](https://github.com/actions/actions-runner-controller/pull/3127)
+1. Bump golang.org.x.net from 0.18.0 to 0.19.0 [#3126](https://github.com/actions/actions-runner-controller/pull/3126)
+1. Bump k8s.io/client-go from 0.28.3 to 0.28.4 [#3125](https://github.com/actions/actions-runner-controller/pull/3125)
+1. Modify user agent format with subsystem and is proxy configured information [#3116](https://github.com/actions/actions-runner-controller/pull/3116)
+1. Record the error when the creation pod fails [#3112](https://github.com/actions/actions-runner-controller/pull/3112)
+1. Fix typo in helm chart comment [#3104](https://github.com/actions/actions-runner-controller/pull/3104)
+1. Set actions client timeout to 5 minutes, add logging to client [#3103](https://github.com/actions/actions-runner-controller/pull/3103)
+1. Refactor listener app with configurable fallback [#3096](https://github.com/actions/actions-runner-controller/pull/3096)
+1. Bump github.com/onsi/gomega from 1.29.0 to 1.30.0 [#3094](https://github.com/actions/actions-runner-controller/pull/3094)
+1. Bump k8s.io/api from 0.28.3 to 0.28.4 [#3093](https://github.com/actions/actions-runner-controller/pull/3093)
+1. Bump k8s.io/apimachinery from 0.28.3 to 0.28.4 [#3092](https://github.com/actions/actions-runner-controller/pull/3092)
+1. Bump github.com/gruntwork-io/terratest from 0.41.24 to 0.46.7 [#3091](https://github.com/actions/actions-runner-controller/pull/3091)
+1. Record a reason for pod failure in EphemeralRunner [#3074](https://github.com/actions/actions-runner-controller/pull/3074)
+1. ADR: Changing semantics of min runners to be min idle runners [#3040](https://github.com/actions/actions-runner-controller/pull/3040)
+
+### v0.7.0
+1. Add ResizePolicy and RestartPolicy on mergeListenerContainer [#3075](https://github.com/actions/actions-runner-controller/pull/3075)
+1. feat: GHA controller Helm Chart quoted labels [#3061](https://github.com/actions/actions-runner-controller/pull/3061)
+1. Update authorization for PAT to be Bearer as documented [#3039](https://github.com/actions/actions-runner-controller/pull/3039)
+1. Metrics: set max and min runners during startup time [#3032](https://github.com/actions/actions-runner-controller/pull/3032)
+1. Update Chart.yaml home URLs [#3013](https://github.com/actions/actions-runner-controller/pull/3013)
+1. Remove inheritance of imagePullPolicy from manager to listeners [#3009](https://github.com/actions/actions-runner-controller/pull/3009)
+1. Trim down metrics cardinality [#3003](https://github.com/actions/actions-runner-controller/pull/3003)
+1. Fix role and rolebinding cleanup for the listener controller [#2970](https://github.com/actions/actions-runner-controller/pull/2970)
+1. Configure listener pod with the secret instead of env [#2965](https://github.com/actions/actions-runner-controller/pull/2965)
+1. Allow custom labels to be specified for controller pods [#2952](https://github.com/actions/actions-runner-controller/pull/2952)
+1. Bump go version and all direct dependencies to newest for k8s compatibility [#2947](https://github.com/actions/actions-runner-controller/pull/2947)
+1. chore: Service accounts in Kubernetes mode can now be annotated. [#2566](https://github.com/actions/actions-runner-controller/pull/2566)
+
+### v0.6.1
+1. Replace TLS dockerd connection with unix socket [#2833](https://github.com/actions/actions-runner-controller/pull/2833)
+1. Fix name override labels when runnerScaleSetName value is set [#2915](https://github.com/actions/actions-runner-controller/pull/2915)
+1. Fix nil map when annotations are applied [#2916](https://github.com/actions/actions-runner-controller/pull/2916)
+1. Updates: container-hooks to v0.4.0 [#2928](https://github.com/actions/actions-runner-controller/pull/2928)
+
 ### v0.6.0
-1. Fix parsing AcquireJob MessageQueueTokenExpiredError (#2837)[https://github.com/actions/actions-runner-controller/pull/2837]
-1. Set restart policy on the runner pod to Never if restartPolicy is not set in template (#2787)[https://github.com/actions/actions-runner-controller/pull/2787]
-1. Set the AutoscalingRunnerSet name to runnerScaleSetName (#2803)[https://github.com/actions/actions-runner-controller/pull/2803]
-1. Extend and generate crds allowing listener pod spec change (#2758)[https://github.com/actions/actions-runner-controller/pull/2758]
-1. Extend the user agent and fix the build version for the listener app (#2892)[https://github.com/actions/actions-runner-controller/pull/2892]
+1. Fix parsing AcquireJob MessageQueueTokenExpiredError [#2837](https://github.com/actions/actions-runner-controller/pull/2837)
+1. Set restart policy on the runner pod to Never if restartPolicy is not set in template [#2787](https://github.com/actions/actions-runner-controller/pull/2787)
+1. Set the AutoscalingRunnerSet name to runnerScaleSetName [#2803](https://github.com/actions/actions-runner-controller/pull/2803)
+1. Extend and generate crds allowing listener pod spec change [#2758](https://github.com/actions/actions-runner-controller/pull/2758)
+1. Extend the user agent and fix the build version for the listener app [#2892](https://github.com/actions/actions-runner-controller/pull/2892)
 
 ### v0.5.0
 
